@@ -4,7 +4,7 @@ import express from 'express'
 
 const app = express()
 dotenv.config({
-    path: "./env"
+    path: "../env"
 })
 
 
@@ -16,5 +16,4 @@ connectDB()
 })
 .catch((error) => {
     console.log(`MONGO DB CONN FAILED : ${error}`);
-    process.exit(1)
 })
