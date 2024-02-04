@@ -14,54 +14,60 @@ const registerUser = asyncHandler( async (req, res)=>{
     // ){
     //     throw new ApiError(400, "All fields are compulsary")
     // }
-    if(fullName === ""){
+    if(fullName === "" || !fullName ){
         throw new ApiError(400, "full name is not specified")
-    }else if(userName === ""){
+    }else if(userName === ""  || !userName){
         throw new ApiError(400, "user name is not specified")
-    }else if(email === ""){
+    }else if(email === ""  || !email){
         throw new ApiError(400, "email is not specified")
-    }else if(password === ""){
+    }else if(password === "" || !password){
         throw new ApiError(400, "password is not specified")
     }
     
-    const userExists = User.findOne({
-        $or: [{userName}, {email}]
-    })
-
+    const userExists = await User.findOne({$or: [{userName}, {email}]})
+    console.log(userExists);
     if(userExists){
         throw new ApiError(409, "Username or email already exists")
+    }else{
+        console.log(req.files);
+        const aviPath = req.files?.avatar[0]?.path
+        let coverPath
+        if(req.files && req.files["coverImage"] && req.files["coverImage"].length > 0){
+            coverPath = req.files.coverImage[0].path
+        }else{
+            coverPath = ""
+        }
+        
+
+        if(!aviPath){
+            throw new ApiError(400, "avatar is not specified")
+        }
+
+        const avatar = await uploadCloudinary(aviPath)
+        const coverImage = await uploadCloudinary(coverPath)
+        const user = await User.create({
+            userName: userName.toLowerCase(),
+            email: email,
+            avatar: avatar.url,
+            fullName: fullName,
+            coverImage: coverImage?.url || "",
+            password: password
+        })
+        const userCreated = await User.findById(user._id).select(
+            "-password -refreshToken"
+        )
+
+
+        if(!userCreated){
+            throw new ApiError(500, "Database error")
+        }
+
+        const apiResponse = new ApiResponse(201, userCreated, "User registration successfull")
+        
+        return res.status(apiResponse.statusCode).json(
+            apiResponse
+        )
     }
-
-    const aviPath = req.files?.avatar[0]?.path
-    const coverPath = req.files?.coverImage[0]?.path
-
-    if(!aviPath){
-        throw new ApiError(400, "avatar is not specified")
-    }
-
-    const avatar = await uploadCloudinary(aviPath)
-    const coverImage = await uploadCloudinary(coverPath)
-
-    const user = await User.create({
-        userName: userName.toLowerCase(),
-        email: email,
-        avatar: avatar.url,
-        fullName: fullName,
-        coverImage: coverImage?.url || "",
-        password: password
-    })
-
-    const userCreated = await User.findById(user._id).select(
-        "-password -refreshToken"
-    )
-
-    if(!userCreated){
-        throw new ApiError(500, "Database error")
-    }
-
-    return res.status(201).json(
-        new ApiError(200, userCreated, "User Registered Successfully")
-    )
 })
 
 
