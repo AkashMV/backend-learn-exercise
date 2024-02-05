@@ -101,9 +101,9 @@ const loginUser = asyncHandler(async (req,res)=>{
     
     const isPassCorrect = await user.isPasswordCorrect(password)
     if(!isPassCorrect){
-        throw new ApiError(401, "User not authorized")
+        throw new ApiError(401, "Incorrect password")
     }
-
+    console.log(user);
     const {accessToken, refreshToken} = await generateTokens(user)
     const loggedInUser = await User.findById(user.id).select("-_id -password -refreshToken")
 
@@ -120,18 +120,18 @@ const loginUser = asyncHandler(async (req,res)=>{
 })
 
 const logoutUser = asyncHandler(async (req, res)=>{
-    await User.findByIdAndUpdate(
+    const user = await User.findByIdAndUpdate(
         req.user._id,
         {
             $set: {
-                refreshToken: undefined
+                refreshToken: ""
             }
         },
         {
             new: true
         }
     )
-
+    console.log(user);
     const options = {
         httpOnly: true,
         secure: true
@@ -144,11 +144,43 @@ const logoutUser = asyncHandler(async (req, res)=>{
     .json(new ApiResponse(200, {}, "log out success"))
 })
 
+// need to make some changes/clarifications
+const changeCurrPassword = asyncHandler(async (req, res)=>{
+    const {oldPassword, newPassword, confirmPassword} = req.body
+    const user = await User.findById(req.user?.id)
+
+    //improvisations needed
+    if(!(await user.isPasswordCorrect(oldPassword))){
+        throw new ApiError(400, "old password provided is incorrect")
+    }
+    if(newPassword != confirmPassword){
+        throw new ApiError(400,"passwords do not match")
+    }
+
+    user.password = confirmPassword
+    await user.save({validateBeforeSave: false})
+
+    const response = new ApiResponse(200, {}, "password changed successfully")
+    return res.status(response.statusCode).json(response.message)
+})
+
+const getCurrentUser = asyncHandler(async (req, res)=>{
+    return res.status(200).json(req.user)
+})
+
+//create update functions for user fields
 
 const updateUser = asyncHandler(async (req, res)=>{
     return res.send("user trying to update")
 })
-export {registerUser, loginUser, logoutUser, updateUser}
+export {
+    registerUser, 
+    loginUser, 
+    logoutUser, 
+    updateUser, 
+    changeCurrPassword,
+    getCurrentUser,
+}
 
 
 
