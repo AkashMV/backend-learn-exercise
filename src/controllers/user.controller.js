@@ -147,7 +147,7 @@ const logoutUser = asyncHandler(async (req, res)=>{
 // need to make some changes/clarifications
 const changeCurrPassword = asyncHandler(async (req, res)=>{
     const {oldPassword, newPassword, confirmPassword} = req.body
-    const user = await User.findById(req.user?.id)
+    const user = await User.findById(req.user?._id)
 
     //improvisations needed
     if(!(await user.isPasswordCorrect(oldPassword))){
@@ -168,7 +168,7 @@ const getCurrentUser = asyncHandler(async (req, res)=>{
     return res.status(200).json(req.user)
 })
 
-//create update functions for user fields
+//create update functions for user fields including file fields
 
 const updateUser = asyncHandler(async (req, res)=>{
     return res.send("user trying to update")
