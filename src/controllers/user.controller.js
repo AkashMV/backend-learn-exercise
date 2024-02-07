@@ -332,6 +332,8 @@ const getWatchHistory = asyncHandler(async (req, res)=>{
     
 })
 
+
+//to be deleted
 const test = async (req, res)=>{
     const response = await uploadCloudinary('C:/Users/nadua/OneDrive/Desktop/webdev/backEndProject/public/temp/samp.jpg')
     console.log(response);
