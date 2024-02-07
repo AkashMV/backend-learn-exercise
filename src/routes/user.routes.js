@@ -41,4 +41,6 @@ router.route("/update").patch(verifyJWT, upload.fields(
 ), updateUser),
 router.route("/history").get(verifyJWT, getWatchHistory)
 router.route("/logout").post(verifyJWT ,logoutUser)
+
+
 export default router
