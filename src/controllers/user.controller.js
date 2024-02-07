@@ -3,6 +3,7 @@ import {ApiError} from "../utils/ApiError.js"
 import {User} from "../models/user.model.js"
 import {uploadCloudinary} from "../utils/cloudinary.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
+import mongoose from "mongoose"
 
 
 const generateTokens = async (user) => {
@@ -54,9 +55,9 @@ const registerUser = asyncHandler( async (req, res)=>{
         if(!aviPath){
             throw new ApiError(400, "avatar is not specified")
         }
-
         const avatar = await uploadCloudinary(aviPath)
         const coverImage = await uploadCloudinary(coverPath)
+        console.log(coverImage);
         const user = await User.create({
             userName: userName.toLowerCase(),
             email: email,
@@ -168,22 +169,61 @@ const getCurrentUser = asyncHandler(async (req, res)=>{
     return res.status(200).json(req.user)
 })
 
-//create update functions for user fields including file fields
 
 const updateUser = asyncHandler(async (req, res)=>{
-    return res.send("user trying to update")
+    const {fullName, email} = req.body
+    if(email){
+        const emailExists = await User.findOne({email: email})
+        if(emailExists){
+            throw new ApiError(400, "Email already exists")
+        }
+    }
+    let aviPath, coverPath;
+    if(req.files && req.files["avatar"] && req.files["avatar"].length > 0){
+        aviPath = req.files.avatar[0].path
+    }else{
+        aviPath = ""
+    }
+    if(req.files && req.files["coverImage"] && req.files["coverImage"].length > 0){
+        coverPath = req.files.coverImage[0].path
+    }else{
+        coverPath = ""
+    }
+    let avatar, coverImage
+    if(aviPath){
+        avatar = await uploadCloudinary(aviPath)
+
+    }
+    if(coverPath){
+        coverImage = await uploadCloudinary(coverPath)
+    }
+    const user  = await User.findByIdAndUpdate(
+        req.user._id,
+        {
+            fullName: fullName || req.user.fullName,
+            email: email || req.user.email,
+            avatar: avatar?.avatar || req.user.avatar,
+            coverImage: coverImage?.url || req.user.coverImage
+        },
+        {
+            returnDocument: "after"
+        }
+    )
+    const response = new ApiResponse(200, user, "user updation successfull")
+    res.status(response.statusCode).json(response.data)
 })
 
+
 const getUserChannelProfile = asyncHandler(async (req, res)=>{
-    const {channelName} = req.params
-    if (!channelName?.trim()){
+    const {channelname} = req.params
+    if (!channelname?.trim()){
         throw new ApiError(400, "username missing")
     }
 
     const channel = await User.aggregate([
         {
             $match: {
-                userName: channelName?.toLowerCase()
+                userName: channelname?.toLowerCase()
             }
         },
         {
@@ -205,10 +245,10 @@ const getUserChannelProfile = asyncHandler(async (req, res)=>{
         {
             $addFields: {
                 subscriberCount: {
-                    $size: "subscribers"
+                    $size: "$subscribers"
                 },
                 subscribedToCount: {
-                    $size: "subscribedTo"
+                    $size: "$subscribedTo"
                 },
                 isSubscribed: {
                     $cond: {
@@ -246,6 +286,43 @@ const getUserChannelProfile = asyncHandler(async (req, res)=>{
     )
 })
 
+const getWatchHistory = asyncHandler(async (req, res)=>{
+    const watchHistory = await User.aggregate([
+        {
+            $match: {
+                id: new mongoose.Types.ObjectId(req.user._id)
+            },
+            $lookup: {
+                from: "video",
+                localField: "watchHistory",
+                foreignField: "_id",
+                as: "watchHistory",
+                pipeline: [
+                    {
+                        $lookup: {
+                            from: "user",
+                            localField: "owner",
+                            foreignField: "_id",
+                            as: "owner",
+                            pipeline: [
+                                {
+                                    $project: {
+                                        userName: 1,
+                                        avatar: 1
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+
+            }
+        }
+    ])
+
+    
+})
+
 export {
     registerUser, 
     loginUser, 
@@ -253,18 +330,6 @@ export {
     updateUser, 
     changeCurrPassword,
     getCurrentUser,
-    getUserChannelProfile
+    getUserChannelProfile,
+    getWatchHistory
 }
-
-
-
-
-//get user details from frontend
-//validation 
-// check if same username/email exists
-// check for images/avatar -- check if the user had sent an avi which is requried
-// upload tehm to cloudinary
-// create user obejct -- make entry in the db
-// remove passwrod and refresh token from the response
-// confirm user creation
-// return response
