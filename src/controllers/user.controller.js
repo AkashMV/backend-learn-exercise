@@ -1,7 +1,7 @@
 import {asyncHandler} from "../utils/asynchandler.js"
 import {ApiError} from "../utils/ApiError.js"
 import {User} from "../models/user.model.js"
-import {uploadCloudinary} from "../utils/cloudinary.js"
+import {uploadCloudinary, deleteCloudinary} from "../utils/cloudinary.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import mongoose from "mongoose"
 
@@ -62,8 +62,10 @@ const registerUser = asyncHandler( async (req, res)=>{
             userName: userName.toLowerCase(),
             email: email,
             avatar: avatar.url,
+            avatarId: avatar.public_id,
             fullName: fullName,
             coverImage: coverImage?.url || "",
+            coverId: coverImage?.public_id || "",
             password: password
         })
         const userCreated = await User.findById(user._id).select(
@@ -189,21 +191,28 @@ const updateUser = asyncHandler(async (req, res)=>{
     }else{
         coverPath = ""
     }
+
     let avatar, coverImage
     if(aviPath){
         avatar = await uploadCloudinary(aviPath)
-
+        await deleteCloudinary(req.user.avatarId)
     }
+
     if(coverPath){
         coverImage = await uploadCloudinary(coverPath)
+        await deleteCloudinary(req.user.coverId)
     }
+
+
     const user  = await User.findByIdAndUpdate(
         req.user._id,
         {
             fullName: fullName || req.user.fullName,
             email: email || req.user.email,
-            avatar: avatar?.avatar || req.user.avatar,
-            coverImage: coverImage?.url || req.user.coverImage
+            avatar: avatar?.url || req.user.avatar,
+            avatarId: avatar?.public_id || req.user.public_id,
+            coverImage: coverImage?.url || req.user.coverImage,
+            coverId: coverImage?.public_id || req.user.coverId,
         },
         {
             returnDocument: "after"
@@ -286,7 +295,6 @@ const getUserChannelProfile = asyncHandler(async (req, res)=>{
     )
 })
 
-
 const getWatchHistory = asyncHandler(async (req, res)=>{
     const watchHistory = await User.aggregate([
         {
@@ -324,6 +332,12 @@ const getWatchHistory = asyncHandler(async (req, res)=>{
     
 })
 
+const test = async (req, res)=>{
+    const response = await uploadCloudinary('C:/Users/nadua/OneDrive/Desktop/webdev/backEndProject/public/temp/samp.jpg')
+    console.log(response);
+    return res.send("F")
+}
+
 export {
     registerUser, 
     loginUser, 
@@ -332,6 +346,6 @@ export {
     changeCurrPassword,
     getCurrentUser,
     getUserChannelProfile,
-    getWatchHistory
+    getWatchHistory,
+    test
 }
-//export 

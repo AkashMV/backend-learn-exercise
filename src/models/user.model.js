@@ -28,9 +28,17 @@ const userSchema = new Schema({
         type: String,
         requried: true
     },
+    avatarId: {
+        type: String,
+        required: true,
+    },
     coverImage: {
         type: String,
         required: false
+    },
+    coverId: {
+        type: String,
+        requried: false
     },
     watchHistory: [{
         type: Schema.Types.ObjectId,
