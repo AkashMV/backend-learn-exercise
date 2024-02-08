@@ -151,11 +151,13 @@ const logoutUser = asyncHandler(async (req, res)=>{
 const changeCurrPassword = asyncHandler(async (req, res)=>{
     const {oldPassword, newPassword, confirmPassword} = req.body
     const user = await User.findById(req.user?._id)
-
-    //improvisations needed
+    if(!(oldPassword && newPassword && confirmPassword)){
+        throw new ApiError(400, "please enter the required fields")
+    }
     if(!(await user.isPasswordCorrect(oldPassword))){
         throw new ApiError(400, "old password provided is incorrect")
     }
+    
     if(newPassword != confirmPassword){
         throw new ApiError(400,"passwords do not match")
     }
@@ -166,6 +168,7 @@ const changeCurrPassword = asyncHandler(async (req, res)=>{
     const response = new ApiResponse(200, {}, "password changed successfully")
     return res.status(response.statusCode).json(response.message)
 })
+
 
 const getCurrentUser = asyncHandler(async (req, res)=>{
     return res.status(200).json(req.user)
@@ -294,6 +297,11 @@ const getUserChannelProfile = asyncHandler(async (req, res)=>{
         new ApiResponse(200, channel[0], "User channel fetched successfully")
     )
 })
+const uploadVideo = asyncHandler(async (req, res)=>{
+    const video = req.file
+    const response = await uploadCloudinary(video.path)
+    return res.send("F")
+})
 
 const getWatchHistory = asyncHandler(async (req, res)=>{
     const watchHistory = await User.aggregate([
@@ -332,14 +340,6 @@ const getWatchHistory = asyncHandler(async (req, res)=>{
     
 })
 
-
-//to be deleted
-const test = async (req, res)=>{
-    const response = await uploadCloudinary('C:/Users/nadua/OneDrive/Desktop/webdev/backEndProject/public/temp/samp.jpg')
-    console.log(response);
-    return res.send("F")
-}
-
 export {
     registerUser, 
     loginUser, 
@@ -349,5 +349,5 @@ export {
     getCurrentUser,
     getUserChannelProfile,
     getWatchHistory,
-    test
+    uploadVideo
 }
