@@ -297,11 +297,6 @@ const getUserChannelProfile = asyncHandler(async (req, res)=>{
         new ApiResponse(200, channel[0], "User channel fetched successfully")
     )
 })
-const uploadVideo = asyncHandler(async (req, res)=>{
-    const video = req.file
-    const response = await uploadCloudinary(video.path)
-    return res.send("F")
-})
 
 const getWatchHistory = asyncHandler(async (req, res)=>{
     const watchHistory = await User.aggregate([
@@ -349,5 +344,4 @@ export {
     getCurrentUser,
     getUserChannelProfile,
     getWatchHistory,
-    uploadVideo
 }
