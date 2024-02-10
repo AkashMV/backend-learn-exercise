@@ -1,3 +1,3 @@
-# Chai Aur Code Backend Series
+# Exercise for learning backend.
 
-Following the backend series for chaiaurbackend.
+Creating a backend framework for setting up a video streaming platform
