@@ -19,10 +19,10 @@ const uploadCloudinary = async (localFilePath)=>{
     }
 }
 
-const deleteCloudinary = async (...publicId)=>{
+const deleteCloudinaryImage = async (...publicId)=>{
     try{
         if(publicId.length > 0){
-            const response = await cloudinary.api.delete_resources(publicId, {type: "upload", resource_type: 'auto'})
+            const response = await cloudinary.api.delete_resources(publicId, {type: "upload", resource_type: "image"})
             return response
         }else{
             return null
@@ -32,4 +32,18 @@ const deleteCloudinary = async (...publicId)=>{
         return null
     }
 }
-export {uploadCloudinary, deleteCloudinary}
+
+const deleteCloudinaryVideo = async (...publicId)=>{
+    try{
+        if(publicId.length > 0){
+            const response = await cloudinary.api.delete_resources(publicId, {type: "upload", resource_type: "video"})
+            return response
+        }else{
+            return null
+        }
+    }catch(e){
+        console.log(e.error)
+        return null
+    }
+}
+export {uploadCloudinary, deleteCloudinaryImage, deleteCloudinaryVideo}

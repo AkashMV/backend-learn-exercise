@@ -1,7 +1,7 @@
 import {asyncHandler} from "../utils/asynchandler.js"
 import {ApiError} from "../utils/ApiError.js"
 import {User} from "../models/user.model.js"
-import {uploadCloudinary, deleteCloudinary} from "../utils/cloudinary.js"
+import {uploadCloudinary, deleteCloudinaryImage} from "../utils/cloudinary.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import mongoose from "mongoose"
 
@@ -198,12 +198,12 @@ const updateUser = asyncHandler(async (req, res)=>{
     let avatar, coverImage
     if(aviPath){
         avatar = await uploadCloudinary(aviPath)
-        await deleteCloudinary(req.user.avatarId)
+        await deleteCloudinaryImage(req.user.avatarId)
     }
 
     if(coverPath){
         coverImage = await uploadCloudinary(coverPath)
-        await deleteCloudinary(req.user.coverId)
+        await deleteCloudinaryImage(req.user.coverId)
     }
 
 
@@ -304,6 +304,8 @@ const getWatchHistory = asyncHandler(async (req, res)=>{
             $match: {
                 id: new mongoose.Types.ObjectId(req.user._id)
             },
+        },
+        {
             $lookup: {
                 from: "video",
                 localField: "watchHistory",
@@ -327,7 +329,6 @@ const getWatchHistory = asyncHandler(async (req, res)=>{
                         }
                     }
                 ]
-
             }
         }
     ])

@@ -16,9 +16,8 @@ const videoSchema = new Schema({
     },
     description:{
         type:String,
-        required: true
     },
-    description:{
+    duration:{
         type:Number,
         required: true
     },
@@ -33,7 +32,16 @@ const videoSchema = new Schema({
     owner: {
         type: Schema.Types.ObjectId,
         ref: "User",
+        required: true
 
+    },
+    videoId: {
+        type: String,
+        required: true,
+    },
+    thumbnailId : {
+        type: String,
+        required: true
     },
     keywords: [{
         type: String
@@ -43,4 +51,4 @@ const videoSchema = new Schema({
 
 videoSchema.plugin(mongooseAggregatePaginate)
 
-export const Video = mongoose.model("Video", videoSchema)
+export const Video = mongoose.model("videos", videoSchema)
