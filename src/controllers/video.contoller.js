@@ -8,6 +8,7 @@ import {ApiResponse} from "../utils/ApiResponse.js"
 
 const getAllVideos = asyncHandler(async (req, res) => {
     const { page = 0, limit = 10, sortBy="views", sortType=-1, userName } = req.query
+    console.log(limit);
     if(!userName){
         throw new ApiError(400, "no username provided")
     }
@@ -48,9 +49,8 @@ const getAllVideos = asyncHandler(async (req, res) => {
     if(!output || output.docs.length < 1){
         return res.status(200).json({"message": "no results"})
     }
-    console.log(output);
     const response = new ApiResponse(200, {...output.docs}, "video data fetched")
-    res.status(response.statusCode).json(response.data)
+    return res.status(response.statusCode).json(response.data)
 })
 
 
@@ -152,6 +152,9 @@ const deleteVideo = asyncHandler(async (req, res) => {
     if(!video){
         throw new ApiError(400, "no authorized video found")
     }
+    if(video.owner != user._id){
+        throw new ApiError(400, "you are not authorized to delete this video")
+    }
     const deletedVideo  = await Video.findByIdAndDelete(videoId)
     if(!deletedVideo){
         throw new ApiError(400, "Internal Server Error")
@@ -159,7 +162,7 @@ const deleteVideo = asyncHandler(async (req, res) => {
 
     await deleteCloudinaryVideo(video.videoId)
     await deleteCloudinaryImage(video.thumbnailId)
-    res.status(200).json({"message": "video deleted succesfully"})
+    return res.status(200).json({"message": "video deleted succesfully"})
 })
 
 
@@ -191,7 +194,7 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
         await video.save()
         response = new ApiResponse(200, video, "video published successfully")
     }
-    res.status(response.statusCode).json(response.message)
+    return res.status(response.statusCode).json(response.message)
 })
 
 export {

@@ -222,7 +222,7 @@ const updateUser = asyncHandler(async (req, res)=>{
         }
     )
     const response = new ApiResponse(200, user, "user updation successfull")
-    res.status(response.statusCode).json(response.data)
+    return res.status(response.statusCode).json(response.data)
 })
 
 

@@ -1,0 +1,4 @@
+//we need to test all the following scenarios.
+
+user registration without key fields
+user login without key fields
