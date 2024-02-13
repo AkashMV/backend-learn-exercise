@@ -35,7 +35,7 @@ app.use("api/v1/playlist", playlistRouter)
 app.use("api/v1/dashboard", dashboardRouter)
 app.use("api/v1/subscribe", subscriptionRouter)
 app.use("api/v1/like", likeRouter)
-app.use("api/v1/comment", commentRouter)
-app.use("api/v1/health", healthCheckRouter)
+app.use("/api/v1/comment", commentRouter)
+app.use("/api/v1/health", healthCheckRouter)
 
 export {app} 

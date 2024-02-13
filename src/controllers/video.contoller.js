@@ -1,7 +1,6 @@
 import mongoose, { Mongoose, Schema } from "mongoose"
 import { asyncHandler } from "../utils/asynchandler.js"
 import { Video } from "../models/video.model.js"
-import { User } from "../models/user.model.js"
 import { deleteCloudinaryImage, deleteCloudinaryVideo, uploadCloudinary } from "../utils/cloudinary.js"
 import { ApiError } from "../utils/ApiError.js"
 import { fileCheck } from "../utils/multerFileCheck.js"
@@ -177,6 +176,7 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
     }
 
 
+
     const video = await Video.findOne({$and: [{_id: new mongoose.Types.ObjectId(videoId)}, {owner: user._id}]})
     if(!video){
         throw new ApiError(400, "no authorized video found")
@@ -202,3 +202,5 @@ export {
     deleteVideo,
     togglePublishStatus
 }
+
+
