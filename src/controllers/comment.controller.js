@@ -46,7 +46,8 @@ const getVideoComments = asyncHandler(async (req, res) => {
     
     ])
     const output = await Comment.aggregatePaginate(comments, {page: page, limit: limit})
-    .then((results)=>{return results}).catch((e)=>{return e;})
+    .then((results)=>{return results})
+    .catch((e)=>{return e;})
     console.log(output.docs);
     if(!output || output.docs.length < 1){
         return res.status(200).json({"message": "no results"})

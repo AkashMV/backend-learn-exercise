@@ -44,7 +44,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
     
     ])
     const output = await Video.aggregatePaginate(videos, {page: page, limit: limit})
-    .then((results)=>{return results}).catch((e)=>{return e;})
+    .then((results)=>{return results}).catch((e)=>{throw e;})
     console.log(output.docs);
     if(!output || output.docs.length < 1){
         return res.status(200).json({"message": "no results"})

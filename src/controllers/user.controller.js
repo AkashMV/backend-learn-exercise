@@ -22,13 +22,7 @@ const generateTokens = async (user) => {
 
 const registerUser = asyncHandler( async (req, res)=>{
     const {fullName, email, userName, password} = req.body
-    console.log(fullName, email, userName, password);
-    
-    // if(
-    //     [fullName, email, userName, password].some((field)=>field?.trim() === "")
-    // ){
-    //     throw new ApiError(400, "All fields are compulsary")
-    // }
+    console.log(fullName, email, userName, password)
     if(fullName === "" || !fullName ){
         throw new ApiError(400, "full name is not specified")
     }else if(userName === ""  || !userName){
