@@ -1,4 +1,4 @@
-import mongoose, { Mongoose, Schema } from "mongoose"
+import mongoose from "mongoose"
 import { asyncHandler } from "../utils/asynchandler.js"
 import { Video } from "../models/video.model.js"
 import { deleteCloudinaryImage, deleteCloudinaryVideo, uploadCloudinary } from "../utils/cloudinary.js"
@@ -116,11 +116,14 @@ const getVideoById = asyncHandler(async (req, res) => {
     if(!videoId){
         throw new ApiError(400, "video id not provided")
     }
-    
     const video = await Video.findById(videoId)
     if(!video){
         throw new ApiError(400, "no video found")
     }
+    const curViews = video.views
+    console.log(video)
+    video.videoViews += 1
+    await video.save()
     const response = new ApiResponse(200, video, "video fetched successfully")
     return res.status(response.statusCode).json(response)
 })
